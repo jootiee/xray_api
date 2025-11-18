@@ -10,27 +10,27 @@ import (
 )
 
 // Add creates a new user in server config and a dedicated client config.
-func (m *Manager) Add(username string) (*UserInfo, []byte, error) {
+func (m *Manager) Add(username string) (*UserInfo, string, error) {
 	if username == "" {
-		return nil, nil, errors.New("username empty")
+		return nil, "", errors.New("username empty")
 	}
 	email := usernameToEmail(username)
 	sj, err := m.loadServer()
 	if err != nil {
-		return nil, nil, err
+		return nil, "", err
 	}
 
 	for _, ib := range sj.Inbounds {
 		for _, c := range ib.Settings.Clients {
 			if c.Email == email {
-				return nil, nil, fmt.Errorf("user %s already exists", username)
+				return nil, "nil", fmt.Errorf("user %s already exists", username)
 			}
 		}
 	}
 	id := newUUID()
 	shortID, err := newShortID()
 	if err != nil {
-		return nil, nil, fmt.Errorf("shortID: %w", err)
+		return nil, "", fmt.Errorf("shortID: %w", err)
 	}
 	// Insert into all VLESS REALITY inbounds (skip api / non vless).
 	for i := range sj.Inbounds {
@@ -52,12 +52,12 @@ func (m *Manager) Add(username string) (*UserInfo, []byte, error) {
 		}
 	}
 	if err := m.saveServer(sj); err != nil {
-		return nil, nil, err
+		return nil, "", err
 	}
-	if cfg, err := m.createClientConfig(username, id, email, shortID); err != nil {
-		return nil, nil, err
+	if cfgPath, err := m.createClientConfig(username, id, email, shortID); err != nil {
+		return nil, "", err
 	} else {
-		return &UserInfo{Username: username, ID: id, ShortID: shortID}, cfg, nil
+		return &UserInfo{Username: username, ID: id, ShortID: shortID}, cfgPath, nil
 	}
 }
 
