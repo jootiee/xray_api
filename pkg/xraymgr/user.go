@@ -57,7 +57,7 @@ func (m *Manager) Add(username string) (*UserInfo, error) {
 	if err := m.createClientConfig(username, id, email, shortID); err != nil {
 		return nil, err
 	}
-	return &UserInfo{Username: username, ID: id}, nil
+	return &UserInfo{Username: username, ID: id, ShortID: shortID}, nil
 }
 
 // Delete removes a user from server and deletes its client config file.

@@ -147,4 +147,5 @@ type ClientJSON struct {
 type UserInfo struct {
 	Username string
 	ID       string
+	ShortID  string
 }
