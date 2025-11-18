@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-// AddUser creates a new user in server config and a dedicated client config.
-func (m *Manager) AddUser(username string) (*UserInfo, error) {
+// Add creates a new user in server config and a dedicated client config.
+func (m *Manager) Add(username string) (*UserInfo, error) {
 	if username == "" {
 		return nil, errors.New("username empty")
 	}
@@ -60,8 +60,8 @@ func (m *Manager) AddUser(username string) (*UserInfo, error) {
 	return &UserInfo{Username: username, ID: id}, nil
 }
 
-// DeleteUser removes a user from server and deletes its client config file.
-func (m *Manager) DeleteUser(username string) error {
+// Delete removes a user from server and deletes its client config file.
+func (m *Manager) Delete(username string) error {
 	if username == "" {
 		return errors.New("username empty")
 	}
@@ -97,8 +97,8 @@ func (m *Manager) DeleteUser(username string) error {
 	return nil
 }
 
-// SuspendUser removes user from server without deleting its client config.
-func (m *Manager) SuspendUser(username string) error {
+// Suspend removes user from server without deleting its client config.
+func (m *Manager) Suspend(username string) error {
 	if username == "" {
 		return errors.New("username empty")
 	}
@@ -126,8 +126,8 @@ func (m *Manager) SuspendUser(username string) error {
 	return m.saveServer(sj)
 }
 
-// ResumeUser re-adds user using its client config.
-func (m *Manager) ResumeUser(username string) error {
+// Resume re-adds user using its client config.
+func (m *Manager) Resume(username string) error {
 	if username == "" {
 		return errors.New("username empty")
 	}
@@ -190,8 +190,8 @@ func (m *Manager) ResumeUser(username string) error {
 	return m.saveServer(sj)
 }
 
-// ListUsers returns active users aggregated uniquely.
-func (m *Manager) ListUsers() ([]UserInfo, error) {
+// List returns active users aggregated uniquely.
+func (m *Manager) List() ([]UserInfo, error) {
 	sj, err := m.loadServer()
 	if err != nil {
 		return nil, err
@@ -216,8 +216,8 @@ func (m *Manager) ListUsers() ([]UserInfo, error) {
 	return users, nil
 }
 
-// GenerateLink builds a VLESS link from the user's client config.
-func (m *Manager) GenerateLink(username string) (string, error) {
+// GetLink builds a VLESS link from the user's client config.
+func (m *Manager) GetLink(username string) (string, error) {
 	path := filepath.Join(m.cfg.Xray.ConfigDir, fmt.Sprintf("config_client_%s.json", username))
 	cj, err := m.loadClient(path)
 	if err != nil {
