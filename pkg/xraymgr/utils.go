@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/google/uuid"
@@ -52,5 +51,3 @@ func copyWithBackup(src, dst string) error {
 	}
 	return os.WriteFile(dst, data, 0644)
 }
-
-func join(paths ...string) string { return filepath.Join(paths...) }
