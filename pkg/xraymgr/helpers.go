@@ -43,10 +43,10 @@ func (m *Manager) loadClient(path string) (*ClientJSON, error) {
 	return &cj, nil
 }
 
-func (m *Manager) createClientConfig(username, id, email, shortID string) (string, error) {
+func (m *Manager) createClientConfig(username, id, email, shortID string) error {
 	template, err := m.loadClient(m.clientTemplatePath)
 	if err != nil {
-		return "", err
+		return err
 	}
 	// adjust first proxy outbound
 	for i := range template.Outbounds {
@@ -74,7 +74,7 @@ func (m *Manager) createClientConfig(username, id, email, shortID string) (strin
 	outPath := filepath.Join(m.cfg.Xray.ConfigDir, fmt.Sprintf("config_client_%s.json", username))
 	data, err := json.MarshalIndent(template, "", "  ")
 	if err != nil {
-		return "", err
+		return err
 	}
-	return outPath, os.WriteFile(outPath, data, 0644)
+	return os.WriteFile(outPath, data, 0644)
 }

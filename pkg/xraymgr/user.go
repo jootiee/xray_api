@@ -10,27 +10,26 @@ import (
 )
 
 // Add creates a new user in server config and a dedicated client config.
-func (m *Manager) Add(username string) (*UserInfo, string, error) {
+func (m *Manager) Add(username string) (*UserInfo, error) {
 	if username == "" {
-		return nil, "", errors.New("username empty")
+		return nil, errors.New("username empty")
 	}
 	email := usernameToEmail(username)
 	sj, err := m.loadServer()
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
 
-	for _, ib := range sj.Inbounds {
-		for _, c := range ib.Settings.Clients {
-			if c.Email == email {
-				return nil, "nil", fmt.Errorf("user %s already exists", username)
-			}
-		}
+	if ok, err := m.IsConfigExists(username); err != nil {
+		return nil, err
+	} else if ok {
+		return nil, fmt.Errorf("user %s already exists", username)
 	}
+
 	id := newUUID()
 	shortID, err := newShortID()
 	if err != nil {
-		return nil, "", fmt.Errorf("shortID: %w", err)
+		return nil, fmt.Errorf("shortID: %w", err)
 	}
 	// Insert into all VLESS REALITY inbounds (skip api / non vless).
 	for i := range sj.Inbounds {
@@ -52,12 +51,12 @@ func (m *Manager) Add(username string) (*UserInfo, string, error) {
 		}
 	}
 	if err := m.saveServer(sj); err != nil {
-		return nil, "", err
+		return nil, err
 	}
-	if cfgPath, err := m.createClientConfig(username, id, email, shortID); err != nil {
-		return nil, "", err
+	if err := m.createClientConfig(username, id, email, shortID); err != nil {
+		return nil, err
 	} else {
-		return &UserInfo{Username: username, ID: id, ShortID: shortID}, cfgPath, nil
+		return &UserInfo{Username: username, ID: id, ShortID: shortID}, nil
 	}
 }
 
@@ -270,4 +269,35 @@ func (m *Manager) GetLink(username string) (string, error) {
 	query := strings.Join(params, "&")
 	link := fmt.Sprintf("vless://%s@%s:%d?%s#%s", u.ID, vn.Address, vn.Port, query, username)
 	return link, nil
+}
+
+func (m *Manager) IsConfigExists(username string) (bool, error) {
+	sj, err := m.loadServer()
+	if err != nil {
+		return false, err
+	}
+	email := usernameToEmail(username)
+
+	for _, ib := range sj.Inbounds {
+		for _, c := range ib.Settings.Clients {
+			if c.Email == email {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
+}
+
+func (m *Manager) GetConfigPath(username string) (string, error) {
+	if ok, err := m.IsConfigExists(username); err != nil {
+		return "", err
+	} else if !ok {
+		return "", fmt.Errorf("%s's config doesn't exist", username)
+	}
+	path := filepath.Join(m.cfg.Xray.ConfigDir, fmt.Sprintf("config_client_%s.json", username))
+
+	if !fileExists(path) {
+		return "", fmt.Errorf("client config for %s not found", username)
+	}
+	return path, nil
 }
