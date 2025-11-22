@@ -21,18 +21,18 @@ func New(configPath string) (*Manager, error) {
 	}
 	m := &Manager{
 		cfg:                cfg,
-		serverConfigPath:   filepath.Join(cfg.Xray.ConfigDir, "config_server.json"),
-		clientTemplatePath: filepath.Join(cfg.Xray.ConfigDir, "config_client.json"),
+		serverConfigPath:   filepath.Join(cfg.ConfigDir, "config_server.json"),
+		clientTemplatePath: filepath.Join(cfg.ConfigDir, "config_client.json"),
 	}
 	return m, nil
 }
 
 // PushServerConfig copies server config to system path and restarts service.
 func (m *Manager) PushServerConfig() error {
-	if err := copyWithBackup(m.serverConfigPath, m.cfg.Xray.SystemConfigPath); err != nil {
+	if err := copyWithBackup(m.serverConfigPath, m.cfg.SystemConfigPath); err != nil {
 		return err
 	}
-	cmd := exec.Command("systemctl", "restart", m.cfg.Xray.ServiceName)
+	cmd := exec.Command("systemctl", "restart", m.cfg.ServiceName)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("restart service: %w", err)
 	}

@@ -3,31 +3,3 @@ xray:
   config_dir: "./conf"
   system_config_path: "/usr/local/etc/xray/config.json"
   service_name: "xray"
-
-server:
-  # Server IP address
-  address: "0.0.0.0"
-  
-  # Main port for REALITY connections
-  port: 443
-  
-  # Alternative port (usually 80)
-  port_80: 80
-  
-  # gRPC port for CDN connections
-  grpc_port: 50051
-  
-  # Fake site to mimic (for REALITY)
-  fake_site: "www.amazon.com"
-  
-  # X25519 keys for REALITY (generate with: xray x25519)
-  private_key: "abcdefghijklmnopqrstuvwxyz123456"
-  public_key: "abcdefghijklmnopqrstuvwxyz123456"
-  
-  # Server names for REALITY
-  server_names:
-    - "www.amazon.com"
-  
-  # Default user credentials 
-  default_user_id: "abcde-abcd-1234-ab12-abcdef123"
-  default_email: "love@xray.com"

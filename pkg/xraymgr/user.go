@@ -92,7 +92,7 @@ func (m *Manager) Delete(username string) error {
 	if err := m.saveServer(sj); err != nil {
 		return err
 	}
-	clientPath := filepath.Join(m.cfg.Xray.ConfigDir, fmt.Sprintf("config_client_%s.json", username))
+	clientPath := filepath.Join(m.cfg.ConfigDir, fmt.Sprintf("config_client_%s.json", username))
 	_ = os.Remove(clientPath)
 	return nil
 }
@@ -131,7 +131,7 @@ func (m *Manager) Resume(username string) error {
 	if username == "" {
 		return errors.New("username empty")
 	}
-	path := filepath.Join(m.cfg.Xray.ConfigDir, fmt.Sprintf("config_client_%s.json", username))
+	path := filepath.Join(m.cfg.ConfigDir, fmt.Sprintf("config_client_%s.json", username))
 	if !fileExists(path) {
 		return fmt.Errorf("client config for %s not found", username)
 	}
@@ -199,7 +199,7 @@ func (m *Manager) List() ([]UserInfo, error) {
 	seen := map[string]UserInfo{}
 	for _, ib := range sj.Inbounds {
 		for _, c := range ib.Settings.Clients {
-			if c.Email == "" || c.Email == m.cfg.Server.DefaultEmail {
+			if c.Email == "" || c.Email == usernameToEmail("love") {
 				continue
 			}
 			u := emailToUsername(c.Email)
@@ -218,7 +218,7 @@ func (m *Manager) List() ([]UserInfo, error) {
 
 // GetLink builds a VLESS link from the user's client config.
 func (m *Manager) GetLink(username string) (string, error) {
-	path := filepath.Join(m.cfg.Xray.ConfigDir, fmt.Sprintf("config_client_%s.json", username))
+	path := filepath.Join(m.cfg.ConfigDir, fmt.Sprintf("config_client_%s.json", username))
 	cj, err := m.loadClient(path)
 	if err != nil {
 		return "", err
@@ -296,7 +296,7 @@ func (m *Manager) GetConfigPath(username string) (string, error) {
 	} else if !ok {
 		return "", fmt.Errorf("%s's config doesn't exist", username)
 	}
-	path := filepath.Join(m.cfg.Xray.ConfigDir, fmt.Sprintf("config_client_%s.json", username))
+	path := filepath.Join(m.cfg.ConfigDir, fmt.Sprintf("config_client_%s.json", username))
 
 	if !fileExists(path) {
 		return "", fmt.Errorf("client config for %s not found", username)

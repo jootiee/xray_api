@@ -57,7 +57,7 @@ func (m *Manager) createClientConfig(username, id, shortID string) error {
 	users.ID = id
 	users.Email = usernameToEmail(username)
 
-	outPath := filepath.Join(m.cfg.Xray.ConfigDir, fmt.Sprintf("config_client_%s.json", username))
+	outPath := filepath.Join(m.cfg.ConfigDir, fmt.Sprintf("config_client_%s.json", username))
 	data, err := json.MarshalIndent(template, "", "  ")
 	if err != nil {
 		return err
