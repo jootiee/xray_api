@@ -53,7 +53,7 @@ func (m *Manager) Add(username string) (*UserInfo, error) {
 	if err := m.saveServer(sj); err != nil {
 		return nil, err
 	}
-	if err := m.createClientConfig(username, id, email, shortID); err != nil {
+	if err := m.createClientConfig(username, id, shortID); err != nil {
 		return nil, err
 	} else {
 		return &UserInfo{Username: username, ID: id, ShortID: shortID}, nil
@@ -239,7 +239,9 @@ func (m *Manager) GetLink(username string) (string, error) {
 	}
 	u := vn.Users[0]
 	ss := ob.StreamSettings
-	params := []string{"encryption=none"}
+	params := []string{"fragment="}
+	params = append(params, "encryption=none")
+
 	if u.Flow != "" {
 		params = append(params, "flow="+u.Flow)
 	}

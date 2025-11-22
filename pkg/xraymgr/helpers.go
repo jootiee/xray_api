@@ -43,34 +43,20 @@ func (m *Manager) loadClient(path string) (*ClientJSON, error) {
 	return &cj, nil
 }
 
-func (m *Manager) createClientConfig(username, id, email, shortID string) error {
+func (m *Manager) createClientConfig(username, id, shortID string) error {
 	template, err := m.loadClient(m.clientTemplatePath)
 	if err != nil {
 		return err
 	}
-	// adjust first proxy outbound
-	for i := range template.Outbounds {
-		ob := &template.Outbounds[i]
-		if ob.Tag == "proxy" && len(ob.Settings.Vnext) > 0 {
-			vn := &ob.Settings.Vnext[0]
-			vn.Address = m.cfg.Server.Address
-			vn.Port = m.cfg.Server.Port
-			if len(vn.Users) == 0 {
-				vn.Users = []VnextUser{{}}
-			}
-			vn.Users[0].ID = id
-			vn.Users[0].Email = email
-			vn.Users[0].Encryption = "none"
-			if ob.StreamSettings != nil && ob.StreamSettings.RealitySettings != nil {
-				r := ob.StreamSettings.RealitySettings
-				r.PublicKey = m.cfg.Server.PublicKey
-				r.ShortID = shortID
-				if len(m.cfg.Server.ServerNames) > 0 {
-					r.ServerName = m.cfg.Server.ServerNames[0]
-				}
-			}
-		}
-	}
+
+	ob := &template.Outbounds[0]
+
+	ob.StreamSettings.RealitySettings.ShortID = shortID
+
+	users := &ob.Settings.Vnext[0].Users[0]
+	users.ID = id
+	users.Email = usernameToEmail(username)
+
 	outPath := filepath.Join(m.cfg.Xray.ConfigDir, fmt.Sprintf("config_client_%s.json", username))
 	data, err := json.MarshalIndent(template, "", "  ")
 	if err != nil {
