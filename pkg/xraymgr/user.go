@@ -15,6 +15,8 @@ func (m *Manager) Add(username string) (*UserInfo, error) {
 		return nil, errors.New("username empty")
 	}
 	email := usernameToEmail(username)
+
+	// Add user to config_server.json logic...
 	sj, err := m.loadServer()
 	if err != nil {
 		return nil, err
@@ -31,25 +33,31 @@ func (m *Manager) Add(username string) (*UserInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("shortID: %w", err)
 	}
-	// Insert into all VLESS REALITY inbounds (skip api / non vless).
-	for i := range sj.Inbounds {
-		ib := &sj.Inbounds[i]
-		if ib.Protocol != "vless" {
-			continue
-		}
-		if ib.Tag == "api" {
-			continue
-		}
-		// add client
-		client := ServerClient{ID: id, Email: email}
-		if ib.StreamSettings != nil && ib.StreamSettings.Security == "reality" && ib.Tag != "grpc" {
-			client.Flow = "xtls-rprx-vision"
-		}
-		ib.Settings.Clients = append(ib.Settings.Clients, client)
-		if ib.StreamSettings != nil && ib.StreamSettings.RealitySettings != nil {
-			ib.StreamSettings.RealitySettings.ShortIds = append(ib.StreamSettings.RealitySettings.ShortIds, shortID)
-		}
-	}
+	// for i := range sj.Inbounds {
+	// 	ib := &sj.Inbounds[i]
+	// 	if ib.Listen == "0.0.0.0" || ib.Protocol != "vless" || ib.Tag == "api" {
+	// 		continue
+	// 	}
+	// 	// add client
+	// 	client := ServerClient{ID: id, Email: email}
+	// 	if ib.StreamSettings != nil && ib.StreamSettings.Security == "reality" && ib.Tag != "grpc" {
+	// 		client.Flow = "xtls-rprx-vision"
+	// 	}
+	// 	ib.Settings.Clients = append(ib.Settings.Clients, client)
+	// 	if ib.StreamSettings != nil && ib.StreamSettings.RealitySettings != nil {
+	// 		ib.StreamSettings.RealitySettings.ShortIds = append(ib.StreamSettings.RealitySettings.ShortIds, shortID)
+	// 	}
+	// }
+	inboundsHTTPSVless := &sj.Inbounds[1]
+	inboundsHTTPSVless.Settings.Clients = append(inboundsHTTPSVless.Settings.Clients, ServerClient{ID: id, Email: email, Flow: "xtls-rprx-vision"})
+	inboundsHTTPSVless.StreamSettings.RealitySettings.ShortIds = append(inboundsHTTPSVless.StreamSettings.RealitySettings.ShortIds, shortID)
+
+	// inboundsHTTPRealitySettings := sj.Inbounds[2].StreamSettings.RealitySettings
+	// inboundsHTTPRealitySettings.ShortIds = append(inboundsHTTPRealitySettings.ShortIds, shortID)
+
+	inboundsGRPCSettings := &sj.Inbounds[3].Settings
+	inboundsGRPCSettings.Clients = append(inboundsGRPCSettings.Clients, ServerClient{ID: id})
+
 	if err := m.saveServer(sj); err != nil {
 		return nil, err
 	}
@@ -302,4 +310,5 @@ func (m *Manager) GetConfigPath(username string) (string, error) {
 		return "", fmt.Errorf("client config for %s not found", username)
 	}
 	return path, nil
+
 }
