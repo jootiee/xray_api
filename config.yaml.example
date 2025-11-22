@@ -1,5 +1,4 @@
-xray:
-  binary_path: "/usr/local/bin/xray"
-  config_dir: "./conf"
-  system_config_path: "/usr/local/etc/xray/config.json"
-  service_name: "xray"
+binary_path: "/usr/local/bin/xray"
+config_dir: "./conf"
+system_config_path: "/usr/local/etc/xray/config.json"
+service_name: "xray"
